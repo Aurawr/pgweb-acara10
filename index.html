@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Web GIS Kabupaten Sleman</title>
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Leaflet CSS -->
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css"
+    />
+
+    <style>
+        body {
+            background-color: #f8f9fa;
+            margin: 0;
+            padding: 0;
+        }
+        #map {
+            width: 100%;
+            height: 75vh;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+        .title-container {
+            text-align: center;
+            margin: 30px 0 20px 0;
+        }
+        .title-container h1 {
+            font-weight: 700;
+            font-size: 2.3rem;
+            background: linear-gradient(90deg, #0d6efd, #00bcd4);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .subtitle {
+            color: #6c757d;
+            font-size: 1rem;
+        }
+        .title-divider {
+            width: 100px;
+            height: 4px;
+            background: linear-gradient(90deg, #0d6efd, #00bcd4);
+            margin: 12px auto 0 auto;
+            border-radius: 2px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container mt-3">
+
+        <!-- Judul Halaman -->
+        <div class="title-container">
+            <h1>Web GIS Kabupaten Sleman</h1>
+            <p class="subtitle">Visualisasi Peta Administrasi, Jalan, dan Data Kependudukan</p>
+            <div class="title-divider"></div>
+        </div>
+
+        <!-- Peta -->
+        <div id="map"></div>
+
+    </div>
+
+    <!-- Leaflet JS -->
+    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+
+    <!-- jQuery -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+
+    <!-- Leaflet Geoserver Plugin -->
+    <script src="lib/L.Geoserver.js"></script>
+
+    <script>
+        var map = L.map("map").setView([-7.677567, 110.406899], 12);
+
+        var osm = L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+            maxZoom: 19,
+            attribution:
+              '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+        }).addTo(map);
+
+        // =========================
+        //   Layer WMS GeoServer
+        // =========================
+
+        // Poligon Desa Sleman
+        var poligon = L.tileLayer.wms(
+            "http://localhost:8080/geoserver/pgweb/wms",
+            {
+                layers: "pgweb:ADMINDESA_SLEMAN_UTM49S",
+                format: "image/png",
+                transparent: true
+            }
+        ).addTo(map);
+
+        // Jalan Sleman
+        var jalan = L.tileLayer.wms(
+            "http://localhost:8080/geoserver/pgweb/wms",
+            {
+                layers: "pgweb:JALAN_LN_25K",
+                format: "image/png",
+                transparent: true
+            }
+        ).addTo(map);
+
+        // Data Penduduk Sleman (centroid)
+        var kecamatan = L.tileLayer.wms(
+            "http://localhost:8080/geoserver/pgweb/wms",
+            {
+                layers: "pgweb:penduduk_sleman",
+                format: "image/png",
+                transparent: true
+            }
+        ).addTo(map);
+
+        // Legend
+        var overlayLayers = {
+        "Administrasi Desa (AR_25K)": poligon,
+        "Jalan 25K": jalan,
+        "Data Kecamatan": kecamatan
+      };
+
+      L.control.layers(null, overlayLayers).addTo(map);
+
+
+    </script>
+
+</body>
+</html>
